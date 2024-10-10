@@ -1,37 +1,62 @@
 activity_welcome.xml
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="#f5f5f5">
 
     <TextView
-        android:id="@+id/welcomeMessage"
+        android:id="@+id/textViewWelcomeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Welcome!"
         android:textSize="24sp"
-        android:textStyle="bold" />
-</RelativeLayout>
+        android:textStyle="bold"
+        android:textColor="#000"
+        android:padding="16dp"
+        android:gravity="center" />
+
+</LinearLayout>
 
 
 WelcomeActivity.java
 
 
-package com.example.registration;
+package com.example.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.support.v7.app.AppCompatActivity;
 
 public class WelcomeActivity extends AppCompatActivity {
+
+    private TextView textViewWelcomeMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+
+        // Find the TextView in the layout
+        textViewWelcomeMessage = findViewById(R.id.textViewWelcomeMessage);
+
+        // Retrieve the data from the Intent
+        Intent intent = getIntent();
+        String username = intent.getStringExtra("username");
+        String email = intent.getStringExtra("email");
+        String gender = intent.getStringExtra("gender");
+
+        // Create the welcome message
+        String welcomeMessage = "Welcome " + username + "!\nEmail: " + email + "\nGender: " + gender;
+
+        // Display the welcome message in the TextView
+        textViewWelcomeMessage.setText(welcomeMessage);
     }
 }
-
 
 androidmanifesh.xml
 
@@ -71,7 +96,6 @@ activity_main.xml
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
-
     <!-- Username Field -->
     <EditText
         android:id="@+id/editTextUsername"
@@ -79,7 +103,6 @@ activity_main.xml
         android:layout_height="wrap_content"
         android:hint="Username"
         android:inputType="text" />
-
     <!-- Email Field -->
     <EditText
         android:id="@+id/editTextEmail"
@@ -89,7 +112,6 @@ activity_main.xml
         android:layout_marginTop="16dp"
         android:hint="Email"
         android:inputType="textEmailAddress" />
-
     <!-- Password Field -->
     <EditText
         android:id="@+id/editTextPassword"
@@ -99,7 +121,6 @@ activity_main.xml
         android:layout_marginTop="16dp"
         android:hint="Password"
         android:inputType="textPassword" />
-
     <!-- Gender Radio Group -->
     <RadioGroup
         android:id="@+id/radioGroupGender"
@@ -107,20 +128,17 @@ activity_main.xml
         android:layout_height="wrap_content"
         android:layout_below="@id/editTextPassword"
         android:layout_marginTop="16dp">
-
         <RadioButton
             android:id="@+id/radioButtonMale"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Male" />
-
         <RadioButton
             android:id="@+id/radioButtonFemale"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Female" />
     </RadioGroup>
-
     <!-- Register Button -->
     <Button
         android:id="@+id/buttonRegister"
@@ -134,6 +152,7 @@ activity_main.xml
 main_activity.java
 package com.example.registration;
 
+package com.example.myapplication;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -146,7 +165,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 public class MainActivity extends AppCompatActivity {
-
     private EditText editTextUsername;
     private EditText editTextEmail;
     private EditText editTextPassword;
@@ -179,21 +197,25 @@ public class MainActivity extends AppCompatActivity {
 
         int selectedGenderId = radioGroupGender.getCheckedRadioButtonId();
         RadioButton selectedGenderButton = findViewById(selectedGenderId);
-        String gender = selectedGenderButton != null ? selectedGenderButton.getText().toString() : "Not specified";
+        String gender = selectedGenderButton != null ?
+                selectedGenderButton.getText().toString() : "Not specified";
 
+        // Save the details in SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-
         editor.putString("username", username);
         editor.putString("email", email);
         editor.putString("password", password);
         editor.putString("gender", gender);
         editor.apply();
 
-        // Optionally navigate to another activity
+        // Send data to the next activity via Intent
         Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+        intent.putExtra("username", username);
+        intent.putExtra("email", email);
+        intent.putExtra("password", password);
+        intent.putExtra("gender", gender);
         startActivity(intent);
         finish();
     }
 }
-
